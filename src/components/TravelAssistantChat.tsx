@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { UserPreferences, DestinationSuggestion, TravelPlan } from "../types";
+import { suggestClientDestinations, generateClientItinerary } from "../utils/staticPlanner";
 import { 
   Send, 
   HelpCircle, 
@@ -149,16 +150,10 @@ export default function TravelAssistantChat({ onPlanGenerated }: TravelAssistant
         }
       ]);
 
-      const response = await fetch("/api/generate-itinerary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(samplePrefs)
-      });
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || "Failed to contact travel planner API");
-      }
-      const data = await response.json();
+      // Simulate network processing delay for a more realistic and premium AI feel
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      const data = generateClientItinerary(samplePrefs);
       onPlanGenerated(data);
     } catch (err: any) {
       setApiError(err.message);
@@ -325,21 +320,14 @@ export default function TravelAssistantChat({ onPlanGenerated }: TravelAssistant
         setApiError(null);
         setMessages(prev => [...prev, {
           sender: "bot",
-          text: `🎉 Marvelous! I have collected all your travel details.\n\nI am now contacting TravelVerse's AI brain to synthesize your personalized itinerary, cost breakdown, packing list, and local tips... This might take 10-15 seconds. Hold tight!`,
+          text: `🎉 Marvelous! I have collected all your travel details.\n\nI am now synthesizing your personalized itinerary, cost breakdown, packing list, and local tips... Hold tight!`,
           timestamp: new Date()
         }]);
 
         try {
-          const response = await fetch("/api/generate-itinerary", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(currentPreferences)
-          });
-          if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.error || "Failed to contact travel planner API");
-          }
-          const planData = await response.json();
+          // Simulate dynamic processing delay
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const planData = generateClientItinerary(currentPreferences);
           onPlanGenerated(planData);
         } catch (err: any) {
           setApiError(err.message);
@@ -409,22 +397,15 @@ export default function TravelAssistantChat({ onPlanGenerated }: TravelAssistant
       }]);
 
       try {
-        const response = await fetch("/api/suggest-destinations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            departureCity: currentPrefs.departureCity,
-            budget: currentPrefs.budget,
-            travelStyle: currentPrefs.travelStyle,
-            interests: currentPrefs.interests,
-            duration: currentPrefs.duration
-          })
-        });
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || "Failed to fetch destination suggestions");
-        }
-        const suggestions: DestinationSuggestion[] = await response.json();
+        // Simulate dynamic processing delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        const suggestions = suggestClientDestinations(
+          currentPrefs.departureCity,
+          currentPrefs.budget,
+          currentPrefs.travelStyle,
+          currentPrefs.interests
+        );
         setSuggestedDestinations(suggestions);
         setMessages(prev => [...prev, {
           sender: "bot",
